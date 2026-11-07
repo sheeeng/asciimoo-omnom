@@ -20,6 +20,7 @@ import (
 
 	"github.com/asciimoo/omnom/config"
 	"github.com/asciimoo/omnom/model"
+	"github.com/asciimoo/omnom/outbound"
 	"github.com/asciimoo/omnom/static"
 	"github.com/asciimoo/omnom/storage"
 	"github.com/asciimoo/omnom/validator"
@@ -727,7 +728,7 @@ func saveMultimedia(h []byte) ([]byte, []*model.Resource, error) {
 }
 
 func saveStream(u string) (*model.Resource, error) {
-	c := &http.Client{Timeout: requestTimeout}
+	c := outbound.Client(requestTimeout)
 	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
 		return nil, err

@@ -46,6 +46,7 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/asciimoo/omnom/outbound"
 	"github.com/asciimoo/omnom/storage"
 	"github.com/asciimoo/omnom/utils"
 
@@ -247,7 +248,7 @@ func SendSignedPostRequest(us, keyID string, data []byte, key *rsa.PrivateKey) e
 		return err
 	}
 	sigHeader := fmt.Sprintf(`keyId="%s",headers="(request-target) host date digest",signature="%s",algorithm="rsa-sha256"`, keyID, base64.StdEncoding.EncodeToString(sig))
-	cli := &http.Client{Timeout: apRequestTimeout}
+	cli := outbound.Client(apRequestTimeout)
 	req, err := http.NewRequest("POST", us, bytes.NewReader(data))
 	if err != nil {
 		return err
@@ -316,7 +317,7 @@ func SendUnfollowRequest(us, userURL string, key *rsa.PrivateKey) error {
 
 // FetchObject fetches an ActivityPub object from a URL.
 func FetchObject(u string) (*InboxRequestObject, error) {
-	c := &http.Client{Timeout: apRequestTimeout}
+	c := outbound.Client(apRequestTimeout)
 	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
 		return nil, err
@@ -339,7 +340,7 @@ func FetchActor(us string, keyID string, key *rsa.PrivateKey) (*Identity, error)
 	if err != nil {
 		return nil, err
 	}
-	c := &http.Client{Timeout: apRequestTimeout}
+	c := outbound.Client(apRequestTimeout)
 	req, err := http.NewRequest("GET", us, nil)
 	if err != nil {
 		return nil, err
@@ -383,7 +384,7 @@ func (i *Identity) SaveFavicon() (string, error) {
 	} else {
 		return "", nil
 	}
-	c := &http.Client{Timeout: apRequestTimeout}
+	c := outbound.Client(apRequestTimeout)
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
 		return "", err

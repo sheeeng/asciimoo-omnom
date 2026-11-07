@@ -44,6 +44,7 @@ import (
 	"strings"
 
 	"github.com/asciimoo/omnom/oauth"
+	"github.com/asciimoo/omnom/outbound"
 
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
@@ -60,6 +61,12 @@ type Config struct {
 	SMTP        SMTP         `yaml:"smtp"`
 	ActivityPub *ActivityPub `yaml:"activitypub"`
 	OAuth       OAuth        `yaml:"oauth"`
+	Outbound    Outbound     `yaml:"outbound"`
+}
+
+// Outbound configures exceptions to the public-only HTTP destination policy.
+type Outbound struct {
+	AllowedPrivateDestinations []string `yaml:"allowed_private_destinations"`
 }
 
 // App holds application-specific settings.
@@ -234,6 +241,9 @@ func parseConfig(rawConfig []byte) (*Config, error) {
 	c := CreateDefaultConfig()
 	err := yaml.Unmarshal(rawConfig, &c)
 	if err != nil {
+		return nil, err
+	}
+	if err := outbound.ValidateExceptions(c.Outbound.AllowedPrivateDestinations); err != nil {
 		return nil, err
 	}
 	if c.Server.RemoteUserHeader != "" {

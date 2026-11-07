@@ -48,6 +48,7 @@ import (
 	ap "github.com/asciimoo/omnom/activitypub"
 	"github.com/asciimoo/omnom/config"
 	"github.com/asciimoo/omnom/model"
+	"github.com/asciimoo/omnom/outbound"
 	"github.com/asciimoo/omnom/storage"
 
 	"github.com/microcosm-cc/bluemonday"
@@ -195,6 +196,7 @@ func UpdateLoop() {
 
 func updateRSSFeed(f *model.Feed) {
 	fp := gofeed.NewParser()
+	fp.Client = outbound.Client(0)
 	pu, err := url.Parse(f.URL)
 	if err != nil {
 		log.Error().Err(err).Str("URL", f.URL).Msg("Failed to parse feed URL")
@@ -418,12 +420,11 @@ func createUserFeed(name string, f *model.Feed, uid uint) error {
 }
 
 func getFeedInfo(u string) (model.FeedType, string, error) {
-	req, err := http.NewRequest("GET", u, nil) //nolint: gosec //safe url
+	req, err := http.NewRequest("GET", u, nil)
 	if err != nil {
 		return "", "", err
 	}
-	//cli := &http.Client{Timeout: TODO}
-	cli := &http.Client{}
+	cli := outbound.Client(0)
 	req.Header.Set("Accept", "application/rss+xml;q=0.7, application/rdf+xml;q=0.65, application/atom+xml;q=0.6, application/xml;q=0.5, text/xml;q=0.4, text/html;q=0.9, text/json;q=0.8, application/activity+json;q=1")
 	resp, err := cli.Do(req)
 	if err != nil {
@@ -503,6 +504,7 @@ func parseHTMLFeedInfo(u string, body []byte) (model.FeedType, string, error) {
 
 func createRSSFeed(u string) (*gofeed.Feed, error) {
 	fp := gofeed.NewParser()
+	fp.Client = outbound.Client(0)
 	return fp.ParseURL(u)
 }
 
@@ -510,7 +512,7 @@ func fetchImageAsInlineURL(u string) string {
 	if u == "" {
 		return ""
 	}
-	r, err := http.Get(u) //nolint: gosec //safe url
+	r, err := outbound.Client(0).Get(u)
 	if err != nil {
 		return ""
 	}
@@ -646,7 +648,7 @@ func rewriteResourceAttributes(n *html.Node) {
 }
 
 func saveResource(u string) (string, error) {
-	resp, err := http.Get(u) //nolint: gosec //safe url
+	resp, err := outbound.Client(0).Get(u)
 	if err != nil {
 		return "", err
 	}

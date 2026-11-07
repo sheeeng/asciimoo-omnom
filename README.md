@@ -71,6 +71,12 @@ Replacing the private key also invalidates login sessions and changes the
 ActivityPub identity key. Replicas of one deployment must use the same private key
 to accept each other's session cookies.
 
+Server-side feed, resource and ActivityPub HTTP requests are restricted to public
+destinations. Intentional internal feeds require an exact IP-and-port exception
+in `outbound.allowed_private_destinations`. These requests use direct connections
+and do not use environment proxies. See [outbound network security](docs/network-security.md)
+for configuration, deployment containment with nftables, and Docker instructions.
+
 
 ## User handling
 

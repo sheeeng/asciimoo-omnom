@@ -25,6 +25,12 @@ storage:
     root_dir: "./static/data"
 feed:
   items_per_page: 20
+outbound:
+  # User/content-controlled HTTP requests can reach public addresses only.
+  # Optional exceptions must be exact private/loopback IP:port pairs.
+  # Every user and remote feed can reach an exception. Known metadata is blocked.
+  allowed_private_destinations: []
+  # allowed_private_destinations: ["192.168.1.10:8080", "[fd00::10]:443"]
 smtp:
   host: "" # leave it blank to disable sending mails
   port: 25

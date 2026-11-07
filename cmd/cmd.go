@@ -49,6 +49,7 @@ import (
 	"github.com/asciimoo/omnom/feed"
 	"github.com/asciimoo/omnom/mail"
 	"github.com/asciimoo/omnom/model"
+	"github.com/asciimoo/omnom/outbound"
 	"github.com/asciimoo/omnom/storage"
 	"github.com/asciimoo/omnom/validator"
 	"github.com/asciimoo/omnom/webapp"
@@ -570,6 +571,9 @@ func initConfig() {
 	cfg, err = config.Load(cfgFile)
 	if err != nil {
 		exit(1, "Failed to initialize config:"+err.Error())
+	}
+	if err := outbound.Configure(cfg.Outbound.AllowedPrivateDestinations); err != nil {
+		exit(1, "Failed to initialize outbound HTTP: "+err.Error())
 	}
 	if l, _ := rootCmd.PersistentFlags().GetString("log-level"); l != "" && (rootCmd.Flags().Changed("log-level") || cfg.App.LogLevel == "") {
 		cfg.App.LogLevel = l
